@@ -104,3 +104,31 @@ CREATE TABLE UserEvents
     FOREIGN KEY (user_id) REFERENCES Users (id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (event_id) REFERENCES Events (id) ON DELETE RESTRICT ON UPDATE CASCADE
 );
+
+###### ===== ACCOUNT VERIFICATIONS ===== ######
+DROP TABLE IF EXISTS AccountVerifications;
+
+CREATE TABLE AccountVerifications
+(
+    id      BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    url     VARCHAR(255)    NOT NULL,
+    -- expiration_date     DATETIME NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES Users (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT UQ_AccountVerifications_User_Id UNIQUE (user_id),
+    CONSTRAINT UQ_AccountVerifications_Url UNIQUE (url)
+);
+
+###### ===== RESET PASSWORD VERIFICATION ===== ######
+DROP TABLE IF EXISTS ResetPasswordVerifications;
+
+CREATE TABLE ResetPasswordVerifications
+(
+    id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id         BIGINT UNSIGNED NOT NULL,
+    url             VARCHAR(255)    NOT NULL,
+    expiration_date DATETIME        NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES Users (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT UQ_ResetPasswordVerifications_User_Id UNIQUE (user_id),
+    CONSTRAINT UQ_ResetPasswordVerifications_Url UNIQUE (url)
+);
