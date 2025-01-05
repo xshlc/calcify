@@ -20,7 +20,7 @@ CREATE SCHEMA IF NOT EXISTS calcifydb;
 
 SET NAMES 'UTF8MB4';
 SET TIME_ZONE = 'US/Eastern';
-SET TIME_ZONE = '-4'; # timezone offset
+SET TIME_ZONE = '-4:00'; # timezone offset
 
 USE calcifydb;
 
