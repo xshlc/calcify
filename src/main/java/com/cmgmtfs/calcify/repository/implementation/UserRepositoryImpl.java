@@ -8,10 +8,12 @@ import com.cmgmtfs.calcify.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -30,15 +32,19 @@ import static java.util.Objects.requireNonNull;
 public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final RoleRepository<Role> roleRepository;
+    private final BCryptPasswordEncoder encoder;
 
     /**
-     * @param data 
+     * @param data
      * @return
      */
     @Override
     public User create(User user) {
         // Check whether the email is unique
-        if (getEmailCount(user.getEmail().trim().toLowerCase()) > 0) throw new ApiException("Email already in use. Please use a different email and try again."));
+        if (getEmailCount(user.getEmail()
+                .trim()
+                .toLowerCase()) > 0)
+            throw new ApiException("Email already in use. Please use a different email and try again."));
         // Save new user
         try {
             KeyHolder holder = new GeneratedKeyHolder();
@@ -53,14 +59,16 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
             // Send email to user with verification URL
             // Return the newly created user
             // If any errors, throw exception with proper message
-        } catch (EmptyResultDataAccessException exception) {} catch (Exception exception) {}
+        } catch (EmptyResultDataAccessException exception) {
+        } catch (Exception exception) {
+        }
 
         return null;
     }
 
 
     /**
-     * @param page 
+     * @param page
      * @param pageSize
      * @return
      */
@@ -70,7 +78,7 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
     }
 
     /**
-     * @param id 
+     * @param id
      * @return
      */
     @Override
@@ -79,7 +87,7 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
     }
 
     /**
-     * @param data 
+     * @param data
      * @return
      */
     @Override
@@ -88,7 +96,7 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
     }
 
     /**
-     * @param id 
+     * @param id
      * @return
      */
     @Override
@@ -98,8 +106,13 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
 
     // Other methods
     private Integer getEmailCount(String email) {
-        return jdbcTemplate.queryForObject(COUNT_USER_EMAIL_QUERY, Map.of("email",email), Integer.class);
+        return jdbcTemplate.queryForObject(COUNT_USER_EMAIL_QUERY, Map.of("email", email), Integer.class);
     }
+
     private SqlParameterSource getSqlParameterSource(User user) {
+        return new MapSqlParameterSource().addValue("firstName", user.getFirstName())
+                .addValue("lastName", user.getLastName())
+                .addValue("email", user.getEmail())
+                .addValue("password", encoder.encode(user.getPassword()));
     }
 }
