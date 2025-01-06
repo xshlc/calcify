@@ -1,7 +1,9 @@
 package com.cmgmtfs.calcify.repository.implementation;
 
+import com.cmgmtfs.calcify.domain.Role;
 import com.cmgmtfs.calcify.domain.User;
 import com.cmgmtfs.calcify.exception.ApiException;
+import com.cmgmtfs.calcify.repository.RoleRepository;
 import com.cmgmtfs.calcify.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,15 +18,18 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+//import static com.cmgmtfs.calcify.query.UserQuery.COUNT_USER_EMAIL_QUERY;
+//import static com.cmgmtfs.calcify.query.UserQuery.INSERT_USER_QUERY;
+import static com.cmgmtfs.calcify.enumeration.RoleType.ROLE_USER;
+import static com.cmgmtfs.calcify.query.UserQuery.*;
 import static java.util.Objects.requireNonNull;
 
 @Repository
 @RequiredArgsConstructor
 @Slf4j
 public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
-    private static final String COUNT_USER_EMAIL_QUERY = "";
-    private static final String INSERT_USER_QUERY = "";
-    public final NamedParameterJdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final RoleRepository<Role> roleRepository;
 
     /**
      * @param data 
@@ -42,14 +47,14 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
             // requireNonNull is a static import
             user.setId(requireNonNull(holder.getKey())
                     .longValue());
-            roleRepository.addRoleToUser(user.getId(), ROLE_USER.name());
+            // Add role to the user
+            roleRepository.addRoleToUser(user.getId(), ROLE_USER.name());// Send verification URL
+            // Save URL and verification table
+            // Send email to user with verification URL
+            // Return the newly created user
+            // If any errors, throw exception with proper message
         } catch (EmptyResultDataAccessException exception) {} catch (Exception exception) {}
-        // Add role to the user
-        // Send verification URL
-        // Save URL and verification table
-        // Send email to user with verification URL
-        // Return the newly created user
-        // If any errors, throw exception with proper message
+
         return null;
     }
 
