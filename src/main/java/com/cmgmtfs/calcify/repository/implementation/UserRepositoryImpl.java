@@ -15,15 +15,16 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 
-//import static com.cmgmtfs.calcify.query.UserQuery.COUNT_USER_EMAIL_QUERY;
-//import static com.cmgmtfs.calcify.query.UserQuery.INSERT_USER_QUERY;
 import static com.cmgmtfs.calcify.enumeration.RoleType.ROLE_USER;
+import static com.cmgmtfs.calcify.enumeration.VerificationType.ACCOUNT;
 import static com.cmgmtfs.calcify.query.UserQuery.*;
+import static java.util.Map.of;
 import static java.util.Objects.requireNonNull;
 
 @Repository
@@ -55,7 +56,11 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
                     .longValue());
             // Add role to the user
             roleRepository.addRoleToUser(user.getId(), ROLE_USER.name());// Send verification URL
+            // Save verification URL
+            String verificationUrl = getVerificationUrl(UUID.randomUUID().toString(),ACCOUNT.getType());
             // Save URL and verification table
+            // static import for Map.of()
+            jdbcTemplate.update(INSERT_ACCOUNT_VERIFICATION_URL_QUERY, of("userId", user.getId(),"url", verificationUrl));
             // Send email to user with verification URL
             // Return the newly created user
             // If any errors, throw exception with proper message
@@ -106,7 +111,7 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
 
     // Other methods
     private Integer getEmailCount(String email) {
-        return jdbcTemplate.queryForObject(COUNT_USER_EMAIL_QUERY, Map.of("email", email), Integer.class);
+        return jdbcTemplate.queryForObject(COUNT_USER_EMAIL_QUERY, of("email", email), Integer.class);
     }
 
     private SqlParameterSource getSqlParameterSource(User user) {
@@ -114,5 +119,9 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
                 .addValue("lastName", user.getLastName())
                 .addValue("email", user.getEmail())
                 .addValue("password", encoder.encode(user.getPassword()));
+    }
+
+    private String getVerificationUrl(String key, String type) {
+        return ServletUriComponentsBuilder.fromCurrentContextPath().path("/user/verify/"+ type + "/" + key).toUriString();
     }
 }
