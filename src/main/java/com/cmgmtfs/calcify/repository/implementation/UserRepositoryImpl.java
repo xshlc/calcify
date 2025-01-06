@@ -45,7 +45,7 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
         if (getEmailCount(user.getEmail()
                 .trim()
                 .toLowerCase()) > 0)
-            throw new ApiException("Email already in use. Please use a different email and try again."));
+            throw new ApiException("Email already in use. Please use a different email and try again.");
         // Save new user
         try {
             KeyHolder holder = new GeneratedKeyHolder();
@@ -62,13 +62,20 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
             // static import for Map.of()
             jdbcTemplate.update(INSERT_ACCOUNT_VERIFICATION_URL_QUERY, of("userId", user.getId(),"url", verificationUrl));
             // Send email to user with verification URL
+            // will create EmailService later
+            //emailService.sendVerification(user.getFirstName(), user.getEmail(), verificationUrl, ACCOUNT);
+            user.setEnabled(false);
+            user.setNotLocked(true);
             // Return the newly created user
+            return user;
             // If any errors, throw exception with proper message
         } catch (EmptyResultDataAccessException exception) {
+            // the only operation that can cause this exception is the roleRepository.addRoleToUser() operation
+            throw new ApiException("No role found by name: " + ROLE_USER.name());
         } catch (Exception exception) {
+            throw new ApiException("An error occurred. Please try again.");
         }
 
-        return null;
     }
 
 
