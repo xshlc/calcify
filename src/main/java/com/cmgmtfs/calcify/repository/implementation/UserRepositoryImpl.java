@@ -1,6 +1,7 @@
 package com.cmgmtfs.calcify.repository.implementation;
 
 import com.cmgmtfs.calcify.domain.User;
+import com.cmgmtfs.calcify.exception.ApiException;
 import com.cmgmtfs.calcify.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,11 +10,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 @RequiredArgsConstructor
 @Slf4j
 public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
+    private static final String COUNT_USER_EMAIL_QUERY = ;
     public final NamedParameterJdbcTemplate jdbcTemplate;
 
     /**
@@ -21,8 +24,9 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
      * @return
      */
     @Override
-    public T create(T data) {
+    public User create(User user) {
         // Check whether the email is unique
+        if (getEmailCount(user.getEmail().trim().toLowerCase()) > 0) throw new ApiException("Email already in use. Please use a different email and try again."));
         // Save new user
         // Add role to the user
         // Send verification URL
@@ -68,5 +72,10 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
     @Override
     public boolean delete(Long id) {
         return false;
+    }
+
+    // Other methods
+    private Integer getEmailCount(String email) {
+        return jdbcTemplate.queryForObject(COUNT_USER_EMAIL_QUERY, Map.of("email",email), Integer.class);
     }
 }
