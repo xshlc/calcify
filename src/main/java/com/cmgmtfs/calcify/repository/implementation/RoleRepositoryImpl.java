@@ -6,15 +6,14 @@ import com.cmgmtfs.calcify.repository.RoleRepository;
 import com.cmgmtfs.calcify.rowmapper.RoleRowMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
-import static com.cmgmtfs.calcify.enumeration.RoleType.ROLE_USER;
+import static com.cmgmtfs.calcify.query.RoleQuery.INSERT_ROLE_TO_USER;
+import static com.cmgmtfs.calcify.query.RoleQuery.SELECT_ROLE_BY_NAME_QUERY;
 import static java.util.Map.of;
 import static java.util.Objects.requireNonNull;
 
@@ -22,8 +21,7 @@ import static java.util.Objects.requireNonNull;
 @RequiredArgsConstructor
 @Slf4j
 public class RoleRepositoryImpl implements RoleRepository<Role> {
-    private static final String SELECT_ROLE_BY_NAME_QUERY = "";
-    private static final String INSERT_ROLE_TO_USER = "";
+
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
