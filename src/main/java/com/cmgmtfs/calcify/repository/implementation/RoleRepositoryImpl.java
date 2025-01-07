@@ -12,8 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Collection;
 import java.util.List;
 
-import static com.cmgmtfs.calcify.query.RoleQuery.INSERT_ROLE_TO_USER;
-import static com.cmgmtfs.calcify.query.RoleQuery.SELECT_ROLE_BY_NAME_QUERY;
+import static com.cmgmtfs.calcify.query.RoleQuery.*;
 import static java.util.Map.of;
 import static java.util.Objects.requireNonNull;
 
