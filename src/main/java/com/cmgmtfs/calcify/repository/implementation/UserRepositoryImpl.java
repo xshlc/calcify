@@ -36,7 +36,7 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
     private final BCryptPasswordEncoder encoder;
 
     /**
-     * @param data
+     * @param user
      * @return
      */
     @Override
@@ -116,11 +116,19 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
         return false;
     }
 
-    // Other methods
+    // // Additional methods // //
+    /**
+     * @param email
+     * @return
+     */
     private Integer getEmailCount(String email) {
         return jdbcTemplate.queryForObject(COUNT_USER_EMAIL_QUERY, of("email", email), Integer.class);
     }
 
+    /**
+     * @param user
+     * @return
+     */
     private SqlParameterSource getSqlParameterSource(User user) {
         return new MapSqlParameterSource().addValue("firstName", user.getFirstName())
                 .addValue("lastName", user.getLastName())
@@ -128,6 +136,11 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
                 .addValue("password", encoder.encode(user.getPassword()));
     }
 
+    /**
+     * @param key
+     * @param type
+     * @return
+     */
     private String getVerificationUrl(String key, String type) {
         return ServletUriComponentsBuilder.fromCurrentContextPath().path("/user/verify/"+ type + "/" + key).toUriString();
     }
