@@ -1,7 +1,8 @@
 package com.cmgmtfs.calcify.service;
 
 import com.cmgmtfs.calcify.domain.User;
+import com.cmgmtfs.calcify.dto.UserDTO;
 
 public interface UserService {
-    void createUser(User user);
+    UserDTO createUser(User user);
 }
