@@ -13,7 +13,7 @@ can't expose db password and other sensitive data:
   ```
     - run as normally now
 
-#### Lombok/Spring/IntelliJ issue.
+### Lombok/Spring/IntelliJ issue.
 lombok in `domain.User` class is not building out the getters and setters correctly causing an error.
 The error occurs in the `repository.implementation.UserRepositoryImpl` class.
 
@@ -39,7 +39,9 @@ things that did not work:
 - downgrading project to 3.3.* from 3.4.*
 - deleting .idea directory and restarting ide
 
-solution:
+#### Solution
+The solution is a combination of doing `mvn clean install`, followed by attempting to run the application, invalidating the VCS cache, restart IntelliJ and re-run the program, and then go into the "Enable Annotation Processing" settings and doing the steps below:
+
 https://intellij-support.jetbrains.com/hc/en-us/community/posts/23064675521682-Lombok-not-workin-with-Intellij
 
 File > Settings > Build,Execution,Deployment > Compiler > Annotation Processors
