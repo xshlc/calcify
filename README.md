@@ -68,3 +68,50 @@ Looking at the issue again. It works after I change it back to the processor pat
 ---
 
 remember: need mysql db running for the application run
+
+## Postman test
+
+after fixing some errors, we run the following test using Postman.
+
+POST
+
+```
+http://localhost:8080/user/register
+```
+
+request body raw:
+```json
+{
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "johndoe@exampleemail.com",
+    "password": "123456"
+}
+```
+
+**201 Created**
+```json
+{
+    "timeStamp": "2025-01-09T02:45:30.831266092",
+    "status": "CREATED",
+    "statusCode": 201,
+    "message": "User created",
+    "data": {
+        "user": {
+            "id": 6,
+            "firstName": "John",
+            "lastName": "Doe",
+            "email": "johndoe@exampleemail.com",
+            "address": null,
+            "phone": null,
+            "title": null,
+            "bio": null,
+            "imageUrl": null,
+            "enabled": false,
+            "createdAt": null,
+            "notLocked": true,
+            "usingMfa": false
+        }
+    }
+}
+```
