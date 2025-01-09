@@ -19,6 +19,7 @@ import java.util.Map;
 
 import static java.time.LocalDateTime.now;
 import static java.util.Map.of;
+import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequestMapping(path = "/user")
@@ -35,8 +36,8 @@ public class UserResource {
                                 .timeStamp(now().toString())
                                 .data(of("user", userDto))
                                 .message("User created")
-                                .status(HttpStatus.CREATED)
-                                .statusCode(HttpStatus.CREATED.value())
+                                .status(CREATED)
+                                .statusCode(CREATED.value())
                                 .build());
 
     }
