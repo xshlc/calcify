@@ -56,3 +56,15 @@ So solution:  Switch to “obtain processors from project classpath”.
 ```
 
 ![Lombok error fix in IntelliJ IDE](imgs_md/lombok_issue_solution_intellij.png)
+
+Processor path to lombok:
+```shell
+/home/seong/.m2/repository/org/projectlombok/lombok/unknown/lombok-unknown.jar
+```
+
+Looking at the issue again. It works after I change it back to the processor path from the project classpath.
+
+
+---
+
+remember: need mysql db running for the application run
