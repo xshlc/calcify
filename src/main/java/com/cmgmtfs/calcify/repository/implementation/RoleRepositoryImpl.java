@@ -80,7 +80,7 @@ public class RoleRepositoryImpl implements RoleRepository<Role> {
         try {
             // static import of Map.of()
             Role role = jdbcTemplate.queryForObject(SELECT_ROLE_BY_NAME_QUERY,
-                    of("roleName", roleName),
+                    of("name", roleName),
                     new RoleRowMapper());
             // we get a warning for 'role.getId()', this is because we have to do require not null
             // static import for Objects.requireNonNull()
@@ -93,6 +93,7 @@ public class RoleRepositoryImpl implements RoleRepository<Role> {
 //            throw new ApiException("No role found by name: " + ROLE_USER.name());
 //        }
         catch (Exception exception) {
+            log.error(exception.getMessage(), exception);
             throw new ApiException("An error occurred. Please try again.");
         }
 

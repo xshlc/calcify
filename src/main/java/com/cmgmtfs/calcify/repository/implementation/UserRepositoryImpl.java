@@ -75,6 +75,7 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
             // the only operation that can cause this exception is the roleRepository.addRoleToUser() operation
             throw new ApiException("No role found by name: " + ROLE_USER.name());
         } catch (Exception exception) {
+            log.error(exception.getMessage(), exception);
             throw new ApiException("An error occurred. Please try again.");
         }
 
