@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.1</version>
+		<version>3.3.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.cmgmtfs</groupId>
@@ -55,11 +55,11 @@
 			<artifactId>mysql-connector-j</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.github.ulisesbocchio</groupId>
-			<artifactId>jasypt-spring-boot-starter</artifactId>
-			<version>3.0.5</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>com.github.ulisesbocchio</groupId>-->
+<!--			<artifactId>jasypt-spring-boot-starter</artifactId>-->
+<!--			<version>3.0.5</version>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -103,11 +103,11 @@
 					</excludes>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>com.github.ulisesbocchio</groupId>
-				<artifactId>jasypt-maven-plugin</artifactId>
-				<version>3.0.5</version>
-			</plugin>
+<!--			<plugin>-->
+<!--				<groupId>com.github.ulisesbocchio</groupId>-->
+<!--				<artifactId>jasypt-maven-plugin</artifactId>-->
+<!--				<version>3.0.5</version>-->
+<!--			</plugin>-->
 		</plugins>
 	</build>
 

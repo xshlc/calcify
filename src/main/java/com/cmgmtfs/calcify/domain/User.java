@@ -36,6 +36,6 @@ public class User {
     private String imageUrl;
     private boolean enabled;
     private boolean isNotLocked;
-    private boolean isUsingMfa; // multi-factor authentication
+    private boolean isUsingMfa; // multifactor authentication
     private LocalDateTime createdAt;
 }

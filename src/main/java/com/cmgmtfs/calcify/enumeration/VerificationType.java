@@ -2,7 +2,7 @@ package com.cmgmtfs.calcify.enumeration;
 
 public enum VerificationType {
     ACCOUNT("ACCOUNT"),
-    PASSWORD("PASSWORD")
+    PASSWORD("PASSWORD");
 
     private final String type;
 

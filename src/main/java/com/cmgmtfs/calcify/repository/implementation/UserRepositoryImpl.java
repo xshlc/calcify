@@ -57,10 +57,12 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
             // Add role to the user
             roleRepository.addRoleToUser(user.getId(), ROLE_USER.name());// Send verification URL
             // Save verification URL
-            String verificationUrl = getVerificationUrl(UUID.randomUUID().toString(),ACCOUNT.getType());
+            String verificationUrl = getVerificationUrl(UUID.randomUUID()
+                    .toString(), ACCOUNT.getType());
             // Save URL and verification table
             // static import for Map.of()
-            jdbcTemplate.update(INSERT_ACCOUNT_VERIFICATION_URL_QUERY, of("userId", user.getId(),"url", verificationUrl));
+            jdbcTemplate.update(INSERT_ACCOUNT_VERIFICATION_URL_QUERY,
+                    of("userId", user.getId(), "url", verificationUrl));
             // Send email to user with verification URL
             // will create EmailService later
             //emailService.sendVerification(user.getFirstName(), user.getEmail(), verificationUrl, ACCOUNT);
@@ -86,7 +88,7 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
      */
     @Override
     public Collection<T> list(int page, int pageSize) {
-        return List.of();
+        return null;
     }
 
     /**
@@ -117,6 +119,7 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
     }
 
     // // Additional methods // //
+
     /**
      * @param email
      * @return
@@ -142,6 +145,8 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
      * @return
      */
     private String getVerificationUrl(String key, String type) {
-        return ServletUriComponentsBuilder.fromCurrentContextPath().path("/user/verify/"+ type + "/" + key).toUriString();
+        return ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/user/verify/" + type + "/" + key)
+                .toUriString();
     }
 }
