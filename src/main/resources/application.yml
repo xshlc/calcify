@@ -1,7 +1,8 @@
 spring:
   profiles:
-    #active: prod
-    active: dev
+    active: '@spring.profiles.active@'
+
+
 
 
 

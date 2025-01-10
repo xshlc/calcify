@@ -2,7 +2,6 @@ spring:
 #  autoconfigure:
 #    exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
   datasource:
-    #url: jdbc:mysql://192.168.1.216:3306/calcifydb
     url: jdbc:mysql://localhost:3306/calcifydb
     password: Admin@123
     username: root
