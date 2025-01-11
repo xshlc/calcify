@@ -1,6 +1,7 @@
 package com.cmgmtfs.calcify.configuration;
 
 import com.cmgmtfs.calcify.handler.CustomAccessDeniedHandler;
+import com.cmgmtfs.calcify.handler.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +22,7 @@ public class SecurityConfig {
     private static final String[] PUBLIC_URLS = {};
     private final BCryptPasswordEncoder encoder;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -53,7 +55,7 @@ public class SecurityConfig {
         // Both handlers are set to `null` here, meaning no custom behavior is defined.
         http.exceptionHandling()
             .accessDeniedHandler(customAccessDeniedHandler)
-            .authenticationEntryPoint(null);
+            .authenticationEntryPoint(customAuthenticationEntryPoint);
 
         // Allow all other requests (not explicitly matched above) to be accessed by anyone without authentication.
         http.authorizeHttpRequests()
