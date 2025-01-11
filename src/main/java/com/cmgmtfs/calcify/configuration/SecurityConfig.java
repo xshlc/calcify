@@ -5,15 +5,16 @@ import com.cmgmtfs.calcify.handler.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
 @EnableWebSecurity
@@ -33,7 +34,7 @@ public class SecurityConfig {
 
         // Configure session management as stateless because the application does not use sessions.
         http.sessionManagement()
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+            .sessionCreationPolicy(STATELESS);
 
         // Allow all requests to URLs defined in the PUBLIC_URLS array without authentication.
         http.authorizeHttpRequests()
@@ -41,12 +42,12 @@ public class SecurityConfig {
 
         // Restrict DELETE requests to "/user/delete/**" to users with the "DELETE:USER" authority.
         http.authorizeHttpRequests()
-            .requestMatchers(HttpMethod.DELETE, "/user/delete/**")
+            .requestMatchers(DELETE, "/user/delete/**")
             .hasAnyAuthority("DELETE:USER");
 
         // Restrict DELETE requests to "/customer/delete/**" to users with the "DELETE:CUSTOMER" authority.
         http.authorizeHttpRequests()
-            .requestMatchers(HttpMethod.DELETE, "/customer/delete/**")
+            .requestMatchers(DELETE, "/customer/delete/**")
             .hasAnyAuthority("DELETE:CUSTOMER");
 
         // Configure how exceptions are handled:
