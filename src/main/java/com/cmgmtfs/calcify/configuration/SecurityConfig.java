@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,6 +20,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableMethodSecurity // proPostEnabled = true is the default
 public class SecurityConfig {
     private static final String[] PUBLIC_URLS = {};
     private final BCryptPasswordEncoder encoder;
@@ -53,7 +55,7 @@ public class SecurityConfig {
         // Configure how exceptions are handled:
         // - AccessDeniedHandler: handles requests where the user is authenticated but lacks necessary permissions.
         // - AuthenticationEntryPoint: handles requests where the user is not authenticated.
-        // Both handlers are set to `null` here, meaning no custom behavior is defined.
+        // Both handlers are set to `null` here, meaning no custom behavior defined.
         http.exceptionHandling()
             .accessDeniedHandler(customAccessDeniedHandler)
             .authenticationEntryPoint(customAuthenticationEntryPoint);
