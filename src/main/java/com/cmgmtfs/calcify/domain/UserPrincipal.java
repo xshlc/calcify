@@ -2,6 +2,7 @@ package com.cmgmtfs.calcify.domain;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -15,6 +16,7 @@ public class UserPrincipal implements UserDetails {
 
     private final User user;
     private final String permissions;
+//    private final Role role;
     /**
      * Returns the authorities granted to the user. Cannot return <code>null</code>.
      *
@@ -28,6 +30,7 @@ public class UserPrincipal implements UserDetails {
         // this will split the string and save the result in an array using stream
         // SimpleGrantedAuthority... we can accept anything that extends GrantedAuthority
         return stream(permissions.split(",".trim())).map(SimpleGrantedAuthority::new).collect(toList());
+//        return AuthorityUtils.commaSeparatedStringToAuthorityList(role.getPermission());
     }
 
     /**
@@ -99,6 +102,7 @@ public class UserPrincipal implements UserDetails {
      */
     @Override
     public boolean isEnabled() {
-        return this.user.isEnabled();
+//        return this.user.isEnabled();
+        return true;
     }
 }

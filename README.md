@@ -176,3 +176,49 @@ sub-zero
   \/_____/   \/_/\/_/   \/_____/   \/_____/   \/_/   \/_/     \/_____/ 
                                                                        
 ```
+
+
+---
+
+
+## Issues with the end of Security Configuration module "Testing Login Method"
+
+result:
+```json
+{
+    "timeStamp": "2025-01-13T23:44:39.732175641",
+    "status": "UNAUTHORIZED",
+    "statusCode": 401,
+    "reason": "You need to log in to access this resource"
+}
+```
+
+however, in the console,
+```shell
+2025-01-13T23:44:39.708-05:00  INFO 51040 --- [nio-8080-exec-2] c.c.c.r.i.UserRepositoryImpl             : User found in the database: johndoe@exampleemail.com
+2025-01-13T23:44:39.709-05:00  INFO 51040 --- [nio-8080-exec-2] c.c.c.r.i.RoleRepositoryImpl             : Fetching role for the user id: 6
+```
+Which means, the User and the Role were successfully found in the database.
+
+This is supposed to pass.
+
+After debugging and checking our code against the different code versions (based on Spring Boot 2.7.x and 3.2.2), it is determined that the issue was...
+
+Inside the `UserPrincipal` class, set `isEnabled()` to return **true** so that the user can login and thus we can test the login functionality through Postman:
+```java
+// inside UserPrincipal 
+
+/**
+     * Indicates whether the user is enabled or disabled. A disabled user cannot be
+     * authenticated.
+     *
+     * @return <code>true</code> if the user is enabled, <code>false</code> otherwise
+     */
+    @Override
+    public boolean isEnabled() {
+//        return this.user.isEnabled();
+        return true;
+    }
+```
+
+***NOTE***: MAKE SURE TO USE THE ENDPOINT URL `http://localhost:8080/user/login` and *NOT* `http://localhost:8080/user/login/`. The latter will cause the login test to fail even though code is all fine. 
