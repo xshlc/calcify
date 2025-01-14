@@ -182,7 +182,8 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T>, Us
         }
     }
 
-    private User getUserByEmail(String email) {
+    @Override
+    public User getUserByEmail(String email) {
         try {
             User user = jdbcTemplate.queryForObject(SELECT_USER_BY_EMAIL_QUERY,
                     of("email", email),

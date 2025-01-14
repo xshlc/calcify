@@ -3,10 +3,10 @@ package com.cmgmtfs.calcify.resource;
 import com.cmgmtfs.calcify.domain.HttpResponse;
 import com.cmgmtfs.calcify.domain.User;
 import com.cmgmtfs.calcify.dto.UserDTO;
+import com.cmgmtfs.calcify.form.LoginForm;
 import com.cmgmtfs.calcify.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Map;
 
 import static java.time.LocalDateTime.now;
 import static java.util.Map.of;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequestMapping(path = "/user")
@@ -31,13 +31,22 @@ public class UserResource {
     private final AuthenticationManager authenticationManager;
 
     @PostMapping("/login")
-    public ResponseEntity<HttpResponse> login(String email, String password) {
+    public ResponseEntity<HttpResponse> login(@RequestBody @Valid LoginForm loginForm) {
         //
-         // inject AuthenticationManager
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+        // inject AuthenticationManager
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginForm.getEmail(), loginForm.getPassword()));
 
+        UserDTO userDTO = userService.getUserByEmail(loginForm.getEmail());
 
-        return null;
+        return ResponseEntity.ok()
+                .body(HttpResponse.builder()
+                        .timeStamp(now().toString())
+                        .data(of("user", userDTO))
+                        .message("Login Success")
+                        .status(OK)
+                        .statusCode(OK.value())
+                        .build());
+
 
     }
 

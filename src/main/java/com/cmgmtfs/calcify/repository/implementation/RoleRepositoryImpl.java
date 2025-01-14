@@ -6,12 +6,14 @@ import com.cmgmtfs.calcify.repository.RoleRepository;
 import com.cmgmtfs.calcify.rowmapper.RoleRowMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
 
+import static com.cmgmtfs.calcify.enumeration.RoleType.ROLE_USER;
 import static com.cmgmtfs.calcify.query.RoleQuery.*;
 import static java.util.Map.of;
 import static java.util.Objects.requireNonNull;
@@ -105,7 +107,17 @@ public class RoleRepositoryImpl implements RoleRepository<Role> {
      */
     @Override
     public Role getRoleByUserId(Long userId) {
-        return null;
+        log.info("Fetching role for the user id: {}", userId);
+        try {
+            return jdbcTemplate.queryForObject(SELECT_ROLE_BY_ID_QUERY,
+                    of("id", userId),
+                    new RoleRowMapper());
+        } catch (EmptyResultDataAccessException exception) {
+            throw new ApiException("No role found by name: " + ROLE_USER.name());
+        } catch (Exception exception) {
+            log.error(exception.getMessage(), exception);
+            throw new ApiException("An error occurred. Please try again.");
+        }
     }
 
     /**

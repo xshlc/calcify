@@ -22,4 +22,7 @@ public interface UserRepository <T extends User>{
     // delete
     // returns a boolean so that we know if successful or not
     boolean delete(Long id);
+
+    /* More Complex Operations */
+    User getUserByEmail(String email);
 }

@@ -24,7 +24,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @RequiredArgsConstructor
 @EnableMethodSecurity // proPostEnabled = true is the default
 public class SecurityConfig {
-    private static final String[] PUBLIC_URLS = {};
+    private static final String[] PUBLIC_URLS = {"/user/login/**"};
     private final BCryptPasswordEncoder encoder;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
@@ -84,14 +84,16 @@ public class SecurityConfig {
                         exception.accessDeniedHandler(customAccessDeniedHandler)
                                 .authenticationEntryPoint(customAuthenticationEntryPoint))
                 .authorizeHttpRequests(request ->
-                        request.requestMatchers(PUBLIC_URLS).permitAll()
+                        request.requestMatchers(PUBLIC_URLS)
+                                .permitAll()
                                 //.requestMatchers(OPTIONS).permitAll()
                                 .requestMatchers(DELETE, "/user/delete/**")
                                 .hasAnyAuthority("DELETE:USER")
                                 .requestMatchers(DELETE, "/customer/delete/**")
                                 .hasAnyAuthority("DELETE:CUSTOMER")
-                                .anyRequest().authenticated());
-                //.addFilterBefore(customAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
+                                .anyRequest()
+                                .authenticated());
+        //.addFilterBefore(customAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
