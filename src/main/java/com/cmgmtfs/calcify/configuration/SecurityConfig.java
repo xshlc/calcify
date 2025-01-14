@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -27,6 +28,7 @@ public class SecurityConfig {
     private final BCryptPasswordEncoder encoder;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final UserDetailsService userDetailsService;
 
     /*
     @Bean
@@ -99,7 +101,11 @@ public class SecurityConfig {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         // call the constructor, then give it the encoder and details service
         // details of the user
-        authProvider.setUserDetailsService(null);
+
+        // since we implemented UserDetailsService interface ourselves,
+        // the Bean will be created and when Spring is wiring things together,
+        // Spring will use our implementation of the UserDetailsService
+        authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(encoder);
         // now the provider knows about the user details and the password encoder
         // we will come back to the user details

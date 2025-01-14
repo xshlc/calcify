@@ -2,9 +2,11 @@ package com.cmgmtfs.calcify.repository.implementation;
 
 import com.cmgmtfs.calcify.domain.Role;
 import com.cmgmtfs.calcify.domain.User;
+import com.cmgmtfs.calcify.domain.UserPrincipal;
 import com.cmgmtfs.calcify.exception.ApiException;
 import com.cmgmtfs.calcify.repository.RoleRepository;
 import com.cmgmtfs.calcify.repository.UserRepository;
+import com.cmgmtfs.calcify.rowmapper.UserRowMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -13,6 +15,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -30,7 +35,7 @@ import static java.util.Objects.requireNonNull;
 @Repository
 @RequiredArgsConstructor
 @Slf4j
-public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
+public class UserRepositoryImpl<T extends User> implements UserRepository<T>, UserDetailsService {
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final RoleRepository<Role> roleRepository;
     private final BCryptPasswordEncoder encoder;
@@ -149,5 +154,46 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T> {
         return ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/user/verify/" + type + "/" + key)
                 .toUriString();
+    }
+
+    /**
+     * Locates the user based on the username. In the actual implementation, the search
+     * may possibly be case sensitive, or case insensitive depending on how the
+     * implementation instance is configured. In this case, the <code>UserDetails</code>
+     * object that comes back may have a username that is of a different case than what
+     * was actually requested..
+     *
+     * @param email the email identifying the user whose data is required.
+     * @return a fully populated user record (never <code>null</code>)
+     * @throws UsernameNotFoundException if the user could not be found or the user has no
+     *                                   GrantedAuthority
+     */
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = getUserByEmail(email);
+        if (user == null) {
+            log.error("User not found in the database");
+            throw new UsernameNotFoundException("User not found in the database");
+        } else {
+            log.info("User found in the database: {}", email);
+            return new UserPrincipal(user,
+                    roleRepository.getRoleByUserId(user.getId())
+                            .getPermission());
+        }
+    }
+
+    private User getUserByEmail(String email) {
+        try {
+            User user = jdbcTemplate.queryForObject(SELECT_USER_BY_EMAIL_QUERY,
+                    of("email", email),
+                    new UserRowMapper());
+            return user;
+        } catch (EmptyResultDataAccessException exception) {
+//            log.error(exception.getMessage());
+            throw new ApiException("No User found by email: " + email);
+        } catch (Exception exception) {
+            log.error(exception.getMessage());
+            throw new ApiException("An error occurred. Please try again.");
+        }
     }
 }
