@@ -222,6 +222,8 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T>, Us
                     of("id", user.getId()));
             jdbcTemplate.update(INSERT_VERIFICATION_CODE_QUERY,
                     of("userId", user.getId(), "code", verificationCode, "expirationDate", expirationDate));
+            // !!! COMMENT THIS OUT in production because every text costs money $$$
+            // sending the text ...
             sendSMS(user.getPhone(), "From: Calcify \nVerification Code\n" + verificationCode);
             // do not need this catch block because we're not doing any SELECT statements
 //        } catch (EmptyResultDataAccessException exception) {

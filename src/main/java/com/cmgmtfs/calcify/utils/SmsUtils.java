@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SmsUtils {
-    public static final String FROM_NUMBER = "";
-    public static final String SID_KEY = "";
-    public static final String TOKEN_KEY = "";
+//    public static final String FROM_NUMBER = "";
+//    public static final String SID_KEY = "";
+//    public static final String TOKEN_KEY = "";
     private static String sid;
     private static String token;
     private static String fromNumber;
@@ -35,22 +35,11 @@ public class SmsUtils {
     public void setFromNumber(String fromNumber) {
         this.fromNumber = fromNumber;
     }
-//    @Value("${twilio.sid}")
-//    private static String sid;
-//
-//    @Value("${twilio.auth-token}")
-//    private static String token;
-//
-//    @Value("${twilio.from-number}")
-//    private static String fromNumber;
 
 
     public static void sendSMS(String to, String messageBody) {
         System.out.println("SID: " + sid + ", TOKEN: " + token + ", FROM: " + fromNumber);
-//        String sid = System.getenv("TWILIO_SID");
-//        String token = System.getenv("TWILIO_AUTH_TOKEN");
-//        String fromNumber = System.getenv("TWILIO_FROM_NUMBER");
-//        System.out.println("SID: " + sid + " TOKEN: " + token + " FROM: " + fromNumber);
+
 //        Twilio.init(SID_KEY, TOKEN_KEY);
 //        Message message = creator(new PhoneNumber("+"+to), new PhoneNumber(FROM_NUMBER), messageBody).create();
 //        System.out.println(message);
