@@ -3,12 +3,14 @@ package com.cmgmtfs.calcify.repository.implementation;
 import com.cmgmtfs.calcify.domain.Role;
 import com.cmgmtfs.calcify.domain.User;
 import com.cmgmtfs.calcify.domain.UserPrincipal;
+import com.cmgmtfs.calcify.dto.UserDTO;
 import com.cmgmtfs.calcify.exception.ApiException;
 import com.cmgmtfs.calcify.repository.RoleRepository;
 import com.cmgmtfs.calcify.repository.UserRepository;
 import com.cmgmtfs.calcify.rowmapper.UserRowMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -23,19 +25,24 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 import static com.cmgmtfs.calcify.enumeration.RoleType.ROLE_USER;
 import static com.cmgmtfs.calcify.enumeration.VerificationType.ACCOUNT;
 import static com.cmgmtfs.calcify.query.UserQuery.*;
+import static com.cmgmtfs.calcify.utils.SmsUtils.sendSMS;
 import static java.util.Map.of;
 import static java.util.Objects.requireNonNull;
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
+import static org.apache.commons.lang3.time.DateUtils.addDays;
 
 @Repository
 @RequiredArgsConstructor
 @Slf4j
 public class UserRepositoryImpl<T extends User> implements UserRepository<T>, UserDetailsService {
+    private static final String DATE_FORMAT = "yyyy-MM-dd hh:mm:ss";
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final RoleRepository<Role> roleRepository;
     private final BCryptPasswordEncoder encoder;
@@ -176,7 +183,9 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T>, Us
             throw new UsernameNotFoundException("User not found in the database");
         } else {
             log.info("User found in the database: {}", email);
-            return new UserPrincipal(user, roleRepository.getRoleByUserId(user.getId()).getPermission());
+            return new UserPrincipal(user,
+                    roleRepository.getRoleByUserId(user.getId())
+                            .getPermission());
 //            return new UserPrincipal(user, roleRepository.getRoleByUserId(user.getId()));
         }
     }
@@ -191,6 +200,33 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T>, Us
         } catch (EmptyResultDataAccessException exception) {
 //            log.error(exception.getMessage());
             throw new ApiException("No User found by email: " + email);
+        } catch (Exception exception) {
+            log.error(exception.getMessage());
+            throw new ApiException("An error occurred. Please try again.");
+        }
+    }
+
+    /**
+     * @param user
+     */
+    @Override
+    public void sendVerificationCode(UserDTO user) {
+        // date + 1 ... which means valid for 24 hours
+        String expirationDate = DateFormatUtils.format(addDays(new Date(), 1), DATE_FORMAT);
+
+        String verificationCode = randomAlphabetic(8).toUpperCase();
+
+        // enter the two into the database
+        try {
+            jdbcTemplate.update(DELETE_VERIFICATION_CODE_BY_USER_ID,
+                    of("id", user.getId()));
+            jdbcTemplate.update(INSERT_VERIFICATION_CODE_QUERY,
+                    of("userId", user.getId(), "code", verificationCode, "expirationDate", expirationDate));
+            sendSMS(user.getPhone(), "From: Calcify \nVerification Code\n" + verificationCode);
+            // do not need this catch block because we're not doing any SELECT statements
+//        } catch (EmptyResultDataAccessException exception) {
+////            log.error(exception.getMessage());
+//            throw new ApiException("No User found by email: " + email);
         } catch (Exception exception) {
             log.error(exception.getMessage());
             throw new ApiException("An error occurred. Please try again.");

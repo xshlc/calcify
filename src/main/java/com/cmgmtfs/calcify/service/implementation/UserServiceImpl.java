@@ -27,6 +27,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void sendVerificationCode(UserDTO user) {
-//        userRepository.sendVerificationCode(user);
+        userRepository.sendVerificationCode(user);
     }
 }

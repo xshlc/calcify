@@ -222,3 +222,14 @@ Inside the `UserPrincipal` class, set `isEnabled()` to return **true** so that t
 ```
 
 ***NOTE***: MAKE SURE TO USE THE ENDPOINT URL `http://localhost:8080/user/login` and *NOT* `http://localhost:8080/user/login/`. The latter will cause the login test to fail even though code is all fine. 
+
+## Twilio
+
+Set environment variables inside `application.properties`.
+The `application.properties` file should be in the same location as `application.yml` (inside the `resources` directory).
+```properties
+# Twilio Credentials
+twilio.sid="+12345678900"
+twilio.auth-token="ABC123"
+twilio.from-number="123abc"
+```

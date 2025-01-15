@@ -1,6 +1,7 @@
 package com.cmgmtfs.calcify.repository;
 
 import com.cmgmtfs.calcify.domain.User;
+import com.cmgmtfs.calcify.dto.UserDTO;
 
 import java.util.Collection;
 
@@ -25,4 +26,5 @@ public interface UserRepository <T extends User>{
 
     /* More Complex Operations */
     User getUserByEmail(String email);
+    void sendVerificationCode(UserDTO user);
 }

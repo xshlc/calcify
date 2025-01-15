@@ -8,6 +8,8 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import static com.cmgmtfs.calcify.utils.SmsUtils.sendSMS;
+
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 //@EnableEncryptableProperties
 public class CalcifyApplication {
@@ -16,6 +18,7 @@ public class CalcifyApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(CalcifyApplication.class, args);
+        sendSMS("12345", "hello");
     }
 
     @Bean

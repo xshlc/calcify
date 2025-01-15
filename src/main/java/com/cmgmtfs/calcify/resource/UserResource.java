@@ -38,17 +38,12 @@ public class UserResource {
 
         UserDTO userDTO = userService.getUserByEmail(loginForm.getEmail());
 
-        return ResponseEntity.ok()
-                .body(HttpResponse.builder()
-                        .timeStamp(now().toString())
-                        .data(of("user", userDTO))
-                        .message("Login Success")
-                        .status(OK)
-                        .statusCode(OK.value())
-                        .build());
+        return userDTO.isUsingMfa() ? sendVerificationCode(userDTO) : sendResponse(userDTO);
 
 
     }
+
+
 
     @PostMapping("/register")
     public ResponseEntity<HttpResponse> saveUser(@RequestBody @Valid User user) {
@@ -69,5 +64,29 @@ public class UserResource {
         return URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/user/get/<userId>")
                 .toUriString());
+    }
+
+
+    private ResponseEntity<HttpResponse> sendResponse(UserDTO userDTO) {
+        return ResponseEntity.ok()
+                .body(HttpResponse.builder()
+                        .timeStamp(now().toString())
+                        .data(of("user", userDTO))
+                        .message("Login Success")
+                        .status(OK)
+                        .statusCode(OK.value())
+                        .build());
+    }
+
+    private ResponseEntity<HttpResponse> sendVerificationCode(UserDTO userDTO) {
+        userService.sendVerificationCode(userDTO);
+        return ResponseEntity.ok()
+                .body(HttpResponse.builder()
+                        .timeStamp(now().toString())
+                        .data(of("user", userDTO))
+                        .message("Verification Code Sent")
+                        .status(OK)
+                        .statusCode(OK.value())
+                        .build());
     }
 }
