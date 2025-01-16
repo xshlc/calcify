@@ -233,3 +233,10 @@ twilio.sid="+12345678900"
 twilio.auth-token="ABC123"
 twilio.from-number="123abc"
 ```
+
+## JWT
+put the `jwt.secret` value (whatever you want essentially) in the `application.properties` file
+
+#### Confirming the user access token and refresh token
+Confirm the JWT tokens using: https://jwt.io/
+Paste in the token to get information on the header (algorithm & token type), payload (data), as well as verifying the signature (secret base64).

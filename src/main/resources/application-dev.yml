@@ -1,6 +1,8 @@
 spring:
 #  autoconfigure:
 #    exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+#  jwt:
+#    secret:
   datasource:
     url: jdbc:mysql://localhost:3306/calcifydb
     password: Admin@123

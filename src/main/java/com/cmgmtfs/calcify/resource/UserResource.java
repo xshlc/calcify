@@ -2,8 +2,11 @@ package com.cmgmtfs.calcify.resource;
 
 import com.cmgmtfs.calcify.domain.HttpResponse;
 import com.cmgmtfs.calcify.domain.User;
+import com.cmgmtfs.calcify.domain.UserPrincipal;
 import com.cmgmtfs.calcify.dto.UserDTO;
 import com.cmgmtfs.calcify.form.LoginForm;
+import com.cmgmtfs.calcify.provider.TokenProvider;
+import com.cmgmtfs.calcify.service.RoleService;
 import com.cmgmtfs.calcify.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,12 +32,15 @@ import static org.springframework.http.HttpStatus.OK;
 public class UserResource {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
+    private final TokenProvider tokenProvider;
+    private final RoleService roleService;
 
     @PostMapping("/login")
     public ResponseEntity<HttpResponse> login(@RequestBody @Valid LoginForm loginForm) {
         //
         // inject AuthenticationManager
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginForm.getEmail(), loginForm.getPassword()));
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginForm.getEmail(),
+                loginForm.getPassword()));
 
         UserDTO userDTO = userService.getUserByEmail(loginForm.getEmail());
 
@@ -42,7 +48,6 @@ public class UserResource {
 
 
     }
-
 
 
     @PostMapping("/register")
@@ -71,11 +76,23 @@ public class UserResource {
         return ResponseEntity.ok()
                 .body(HttpResponse.builder()
                         .timeStamp(now().toString())
-                        .data(of("user", userDTO))
+//                        .data(of("user", userDTO))
+                        .data(of("user",
+                                userDTO,
+                                "access_token",
+                                tokenProvider.createAccessToken(getUserPrincipal(userDTO)),
+                                "refresh_token",
+                                tokenProvider.createRefreshToken(getUserPrincipal(userDTO))))
                         .message("Login Success")
                         .status(OK)
                         .statusCode(OK.value())
                         .build());
+    }
+
+    private UserPrincipal getUserPrincipal(UserDTO userDTO) {
+        return new UserPrincipal(userService.getUser(userDTO.getEmail()),
+                roleService.getRoleByUserId(userDTO.getId())
+                        .getPermission());
     }
 
     private ResponseEntity<HttpResponse> sendVerificationCode(UserDTO userDTO) {
