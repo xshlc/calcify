@@ -8,6 +8,8 @@ import com.cmgmtfs.calcify.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import static com.cmgmtfs.calcify.dtomapper.UserDTOMapper.fromUser;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -17,12 +19,12 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UserDTO createUser(User user) {
-        return UserDTOMapper.fromUser(userRepository.create(user));
+        return fromUser(userRepository.create(user));
     }
 
     @Override
     public UserDTO getUserByEmail(String email) {
-        return UserDTOMapper.fromUser(userRepository.getUserByEmail(email));
+        return fromUser(userRepository.getUserByEmail(email));
     }
 
     @Override
@@ -37,5 +39,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUser(String email) {
         return userRepository.getUserByEmail(email);
+    }
+
+    /**
+     * @param email 
+     * @param code
+     * @return
+     */
+    @Override
+    public UserDTO verifyCode(String email, String code) {
+        return fromUser(userRepository.verifyCode(email, code));
     }
 }

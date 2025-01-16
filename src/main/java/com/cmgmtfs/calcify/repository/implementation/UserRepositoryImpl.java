@@ -222,15 +222,42 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T>, Us
                     of("id", user.getId()));
             jdbcTemplate.update(INSERT_VERIFICATION_CODE_QUERY,
                     of("userId", user.getId(), "code", verificationCode, "expirationDate", expirationDate));
-            // !!! COMMENT THIS OUT in production because every text costs money $$$
+            // !!! COMMENT THIS OUT in production and testing because every text costs money $$$
             // sending the text ...
-            sendSMS(user.getPhone(), "From: Calcify \nVerification Code\n" + verificationCode);
+//            sendSMS(user.getPhone(), "From: Calcify \nVerification Code\n" + verificationCode);
+            log.info("Verification Code: {}", verificationCode);
             // do not need this catch block because we're not doing any SELECT statements
 //        } catch (EmptyResultDataAccessException exception) {
 ////            log.error(exception.getMessage());
 //            throw new ApiException("No User found by email: " + email);
         } catch (Exception exception) {
             log.error(exception.getMessage());
+            throw new ApiException("An error occurred. Please try again.");
+        }
+    }
+
+    /**
+     * @param email
+     * @param code
+     * @return
+     */
+    @Override
+    public User verifyCode(String email, String code) {
+        try {
+            User userByCode = jdbcTemplate.queryForObject(SELECT_USER_BY_USER_CODE_QUERY, of("code", code), new UserRowMapper());
+            User userByEmail = jdbcTemplate.queryForObject(SELECT_USER_BY_EMAIL_QUERY, of("email", email), new UserRowMapper());
+            // check if the user found by using the code is the same as the user found by the email
+            // otherwise, anyone with the code can be given an access token to login
+            if (userByCode.getEmail().equalsIgnoreCase(userByEmail.getEmail())) {
+                // if they are the same, then return any of the User objects as they are the same
+                jdbcTemplate.update(DELETE_CODE, of("code", code));
+                return userByCode;
+            } else {
+                throw new ApiException("Code is invalid. Please try again.");
+            }
+        } catch (EmptyResultDataAccessException exception) {
+            throw new ApiException("Unable to find record.");
+        } catch (Exception exception) {
             throw new ApiException("An error occurred. Please try again.");
         }
     }
