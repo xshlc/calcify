@@ -226,10 +226,6 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T>, Us
             // sending the text ...
 //            sendSMS(user.getPhone(), "From: Calcify \nVerification Code\n" + verificationCode);
             log.info("Verification Code: {}", verificationCode);
-            // do not need this catch block because we're not doing any SELECT statements
-//        } catch (EmptyResultDataAccessException exception) {
-////            log.error(exception.getMessage());
-//            throw new ApiException("No User found by email: " + email);
         } catch (Exception exception) {
             log.error(exception.getMessage());
             throw new ApiException("An error occurred. Please try again.");
@@ -243,6 +239,8 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T>, Us
      */
     @Override
     public User verifyCode(String email, String code) {
+        // if the code is expired, throw an exception
+        if(isVerificationCodeExpired(code)) throw new ApiException("Verification code expired. Please login again.");
         try {
             User userByCode = jdbcTemplate.queryForObject(SELECT_USER_BY_USER_CODE_QUERY, of("code", code), new UserRowMapper());
             User userByEmail = jdbcTemplate.queryForObject(SELECT_USER_BY_EMAIL_QUERY, of("email", email), new UserRowMapper());
@@ -257,6 +255,16 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T>, Us
             }
         } catch (EmptyResultDataAccessException exception) {
             throw new ApiException("Unable to find record.");
+        } catch (Exception exception) {
+            throw new ApiException("An error occurred. Please try again.");
+        }
+    }
+
+    private Boolean isVerificationCodeExpired(String code) {
+        try {
+            return jdbcTemplate.queryForObject(SELECT_CODE_EXPIRATION_QUERY, of("code", code), Boolean.class);
+        } catch (ApiException exception) {
+            throw new ApiException("This code is not valid. Please try again.");
         } catch (Exception exception) {
             throw new ApiException("An error occurred. Please try again.");
         }

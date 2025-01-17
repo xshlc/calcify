@@ -16,5 +16,7 @@ public class UserQuery {
     // therefore, we ideally want to also pass in the user email when deleting the code to enforce more strictness
     //  however, this will do ...
     public static final String DELETE_CODE = "DELETE FROM TwoFactorVerifications WHERE code = :code";
+
+    public static final String SELECT_CODE_EXPIRATION_QUERY = "SELECT expiration_date < NOW() AS is_expired FROM TwoFactorVerifications WHERE code = :code";
 }
 

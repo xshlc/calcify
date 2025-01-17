@@ -1,10 +1,13 @@
 package com.cmgmtfs.calcify.dto;
 
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserDTO {
     //
     private Long id;
@@ -21,4 +24,6 @@ public class UserDTO {
     private boolean isNotLocked;
     private boolean isUsingMfa; // multi-factor authentication
     private LocalDateTime createdAt;
+    private String roleName;
+    private String permissions;
 }

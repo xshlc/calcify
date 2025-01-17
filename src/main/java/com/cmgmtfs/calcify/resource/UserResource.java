@@ -14,14 +14,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 
+import static com.cmgmtfs.calcify.dtomapper.UserDTOMapper.toUser;
 import static java.time.LocalDateTime.now;
 import static java.util.Map.of;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath;
 
 @RestController
 @RequestMapping(path = "/user")
@@ -83,7 +84,7 @@ public class UserResource {
     }
 
     private URI getUri() {
-        return URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
+        return URI.create(fromCurrentContextPath()
                 .path("/user/get/<userId>")
                 .toUriString());
     }
@@ -107,7 +108,7 @@ public class UserResource {
     }
 
     private UserPrincipal getUserPrincipal(UserDTO userDTO) {
-        return new UserPrincipal(userService.getUser(userDTO.getEmail()),
+        return new UserPrincipal(toUser(userService.getUserByEmail(userDTO.getEmail())),
                 roleService.getRoleByUserId(userDTO.getId())
                         .getPermission());
     }
