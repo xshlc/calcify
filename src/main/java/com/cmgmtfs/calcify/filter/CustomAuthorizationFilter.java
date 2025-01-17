@@ -23,7 +23,8 @@ import java.util.Map;
 public class CustomAuthorizationFilter extends OncePerRequestFilter {
 
     private final TokenProvider tokenProvider; // dependency injection
-
+    public static final String TOKEN_KEY = "token";
+    public static final String EMAIL_KEY = "email";
 
     /**
      * @param request
@@ -53,11 +54,11 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
             // first get the token
             String token = getToken(request);
 
-            if (tokenProvider.isTokenValid(values.get("email"), token)) {
+            if (tokenProvider.isTokenValid(values.get(EMAIL_KEY), token)) {
                 // get all the granted authorities and authentication
                 // set all the info on the security context
-                List<GrantedAuthority> authorities = tokenProvider.getAuthorities(values.get("token"));
-                Authentication auth = tokenProvider.getAuthentication(values.get("email"), authorities, request);
+                List<GrantedAuthority> authorities = tokenProvider.getAuthorities(values.get(TOKEN_KEY));
+                Authentication auth = tokenProvider.getAuthentication(values.get(EMAIL_KEY), authorities, request);
 
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
