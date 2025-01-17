@@ -17,14 +17,24 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Arrays.asList;
+import static java.util.Map.of;
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class CustomAuthorizationFilter extends OncePerRequestFilter {
 
+    private static final String TOKEN_PREFIX = "Bearer ";
+    private static final String[] PUBLIC_ROUTES = {"/user/login", "/user/verify/code", "/user/register"};
+    private static final String HTTP_OPTIONS_METHOD = "OPTIONS";
     private final TokenProvider tokenProvider; // dependency injection
-    public static final String TOKEN_KEY = "token";
-    public static final String EMAIL_KEY = "email";
+    protected static final String TOKEN_KEY = "token";
+    protected static final String EMAIL_KEY = "email";
 
     /**
      * @param request
@@ -50,7 +60,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
             Map<String, String> values = getRequestValues(request);
 
             // look at the token and validate it
-            
+
             // first get the token
             String token = getToken(request);
 
@@ -60,7 +70,8 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                 List<GrantedAuthority> authorities = tokenProvider.getAuthorities(values.get(TOKEN_KEY));
                 Authentication auth = tokenProvider.getAuthentication(values.get(EMAIL_KEY), authorities, request);
 
-                SecurityContextHolder.getContext().setAuthentication(auth);
+                SecurityContextHolder.getContext()
+                        .setAuthentication(auth);
 
             } else {
                 // else token not valid
@@ -98,16 +109,22 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     }
 
     private String getToken(HttpServletRequest request) {
-        return null;
+        return ofNullable(request.getHeader(AUTHORIZATION))
+                .filter(header -> header.startsWith(TOKEN_PREFIX))
+                .map(token -> token.replace(TOKEN_PREFIX, EMPTY))
+                .get();
     }
 
     private Map<String, String> getRequestValues(HttpServletRequest request) {
-        return null;
+        return of(EMAIL_KEY, tokenProvider.getSubject(getToken(request), request), TOKEN_KEY, getToken(request));
     }
 
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        return false;
+        return request.getHeader(AUTHORIZATION) == null ||
+                request.getHeader(AUTHORIZATION).startsWith(TOKEN_PREFIX) ||
+                request.getMethod().equalsIgnoreCase(HTTP_OPTIONS_METHOD) ||
+                asList(PUBLIC_ROUTES).contains(request.getRequestURI());
     }
 }
