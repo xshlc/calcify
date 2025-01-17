@@ -80,20 +80,12 @@ public class RoleRepositoryImpl implements RoleRepository<Role> {
     public void addRoleToUser(Long userId, String roleName) {
         log.info("Adding role {} to user {}", roleName, userId);
         try {
-            // static import of Map.of()
             Role role = jdbcTemplate.queryForObject(SELECT_ROLE_BY_NAME_QUERY,
                     of("name", roleName),
                     new RoleRowMapper());
-            // we get a warning for 'role.getId()', this is because we have to do require not null
-            // static import for Objects.requireNonNull()
             jdbcTemplate.update(INSERT_ROLE_TO_USER, of("userId", userId, "roleId", requireNonNull(role)
                     .getId()));
         }
-        // this catch block is redundant because it does the same in the UserRepositoryImpl create() 
-//        catch (EmptyResultDataAccessException exception) {
-//            // the only operation that can cause this exception is the roleRepository.addRoleToUser() operation
-//            throw new ApiException("No role found by name: " + ROLE_USER.name());
-//        }
         catch (Exception exception) {
             log.error(exception.getMessage(), exception);
             throw new ApiException("An error occurred. Please try again.");

@@ -63,28 +63,17 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T>, Us
             KeyHolder holder = new GeneratedKeyHolder();
             SqlParameterSource parameters = getSqlParameterSource(user);
             jdbcTemplate.update(INSERT_USER_QUERY, parameters, holder);
-            // requireNonNull is a static import
             user.setId(requireNonNull(holder.getKey())
                     .longValue());
-            // Add role to the user
             roleRepository.addRoleToUser(user.getId(), ROLE_USER.name());// Send verification URL
-            // Save verification URL
             String verificationUrl = getVerificationUrl(UUID.randomUUID()
                     .toString(), ACCOUNT.getType());
-            // Save URL and verification table
-            // static import for Map.of()
             jdbcTemplate.update(INSERT_ACCOUNT_VERIFICATION_URL_QUERY,
                     of("userId", user.getId(), "url", verificationUrl));
-            // Send email to user with verification URL
-            // will create EmailService later
-            //emailService.sendVerification(user.getFirstName(), user.getEmail(), verificationUrl, ACCOUNT);
             user.setEnabled(false);
             user.setNotLocked(true);
-            // Return the newly created user
             return user;
-            // If any errors, throw exception with proper message
         } catch (EmptyResultDataAccessException exception) {
-            // the only operation that can cause this exception is the roleRepository.addRoleToUser() operation
             throw new ApiException("No role found by name: " + ROLE_USER.name());
         } catch (Exception exception) {
             log.error(exception.getMessage(), exception);
@@ -216,7 +205,6 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T>, Us
 
         String verificationCode = randomAlphabetic(8).toUpperCase();
 
-        // enter the two into the database
         try {
             jdbcTemplate.update(DELETE_VERIFICATION_CODE_BY_USER_ID,
                     of("id", user.getId()));
