@@ -1,5 +1,6 @@
 package com.cmgmtfs.calcify.configuration;
 
+import com.cmgmtfs.calcify.filter.CustomAuthorizationFilter;
 import com.cmgmtfs.calcify.handler.CustomAccessDeniedHandler;
 import com.cmgmtfs.calcify.handler.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -35,6 +37,7 @@ public class SecurityConfig {
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final UserDetailsService userDetailsService;
+    private final CustomAuthorizationFilter customAuthorizationFilter;
 
     /*
     @Bean
@@ -98,8 +101,8 @@ public class SecurityConfig {
                                 .requestMatchers(DELETE, "/customer/delete/**")
                                 .hasAnyAuthority("DELETE:CUSTOMER")
                                 .anyRequest()
-                                .authenticated());
-        //.addFilterBefore(customAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
+                                .authenticated())
+                .addFilterBefore(customAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
