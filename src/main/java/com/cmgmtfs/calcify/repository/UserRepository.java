@@ -6,27 +6,16 @@ import com.cmgmtfs.calcify.dto.UserDTO;
 import java.util.Collection;
 
 
-public interface UserRepository <T extends User>{
-    /* Basic CRUD operations */
-    // create
+public interface UserRepository<T extends User> {
+    /* Basic CRUD Operations */
     T create(T data);
-
-    // read
-    // read many
     Collection<T> list(int page, int pageSize);
-    // read one
     T get(Long id);
-
-    // update
     T update(T data);
-
-    // delete
-    // returns a boolean so that we know if successful or not
-    boolean delete(Long id);
+    Boolean delete(Long id);
 
     /* More Complex Operations */
     User getUserByEmail(String email);
     void sendVerificationCode(UserDTO user);
-
     User verifyCode(String email, String code);
 }

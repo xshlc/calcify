@@ -37,22 +37,32 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     protected static final String EMAIL_KEY = "email";
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filter) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
         try {
+
+            Map<String, String> values = getRequestValues(request);
+
+            // first get the token
             String token = getToken(request);
-            Long userId = getUserId(request);
-            if (tokenProvider.isTokenValid(userId, token)) {
-                List<GrantedAuthority> authorities = tokenProvider.getAuthorities(token);
-                Authentication authentication = tokenProvider.getAuthentication(userId, authorities, request);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            if (tokenProvider.isTokenValid(values.get(EMAIL_KEY), token)) {
+                List<GrantedAuthority> authorities = tokenProvider.getAuthorities(values.get(TOKEN_KEY));
+                Authentication auth = tokenProvider.getAuthentication(values.get(EMAIL_KEY), authorities, request);
+
+                SecurityContextHolder.getContext()
+                        .setAuthentication(auth);
+
             } else {
                 SecurityContextHolder.clearContext();
             }
-            filter.doFilter(request, response);
-        } catch (Exception exception) {
-            log.error(exception.getMessage());
-//            processError(request, response, exception);
+
+            filterChain.doFilter(request, response);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+//            processError(request, response, e);
         }
+
 
     }
 
@@ -62,9 +72,14 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                 request.getMethod().equalsIgnoreCase(HTTP_OPTIONS_METHOD) || asList(PUBLIC_ROUTES).contains(request.getRequestURI());
     }
 
-    private Long getUserId(HttpServletRequest request) {
-        return tokenProvider.getSubject(getToken(request), request);
+    private Map<String, String> getRequestValues(HttpServletRequest request) {
+        return of(EMAIL_KEY, tokenProvider.getSubject(getToken(request), request), TOKEN_KEY, getToken(request));
     }
+
+
+//    private Long getUserId(HttpServletRequest request) {
+//        return tokenProvider.getSubject(getToken(request), request);
+//    }
 
     private String getToken(HttpServletRequest request) {
         return ofNullable(request.getHeader(AUTHORIZATION))

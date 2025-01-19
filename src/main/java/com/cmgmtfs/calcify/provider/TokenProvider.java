@@ -57,42 +57,16 @@ public class TokenProvider {
     }
 
     public String createRefreshToken(UserPrincipal userPrincipal) {
-        return JWT.create()
-                .withIssuer(C_MGMT_FS)
-                .withAudience(CUSTOMER_MANAGEMENT_SERVICE)
-                .withIssuedAt(new Date())
-                .withSubject(
-                        userPrincipal.getUsername())
-                .withExpiresAt(new Date(currentTimeMillis() * REFRESH_TOKEN_EXPIRATION_TIME))
-                .sign(
-                        HMAC512(secret.getBytes()));
+        return JWT.create().withIssuer(C_MGMT_FS).withAudience(CUSTOMER_MANAGEMENT_SERVICE)
+                .withIssuedAt(new Date()).withSubject(userPrincipal.getUsername())
+                .withExpiresAt(new Date(currentTimeMillis() + REFRESH_TOKEN_EXPIRATION_TIME))
+                .sign(HMAC512(secret.getBytes()));
+
     }
 
-    public List<GrantedAuthority> getAuthorities(String token) {
-        String[] claims = getClaimsFromToken(token);
-        return stream(claims).map(SimpleGrantedAuthority::new)
-                .collect(toList());
-    }
-
-//    public String getSubject(String token, HttpServletRequest request) {
-//        JWTVerifier verifier = getJWTVerifier();
-//        String subject = "";
-//        try {
-//            subject = verifier.verify(token)
-//                    .getSubject();
-//        } catch (TokenExpiredException e) {
-//            request.setAttribute("expiredMessage", e.getMessage());
-//        } catch (InvalidClaimException e) {
-//            request.setAttribute("invalidClaim", e.getMessage());
-//        } catch (Exception e) {
-//            throw e;
-//        }
-//        return subject;
-//    }
-
-    public Long getSubject(String token, HttpServletRequest request) {
+    public String getSubject(String token, HttpServletRequest request) {
         try {
-            return Long.valueOf(getJWTVerifier().verify(token).getSubject());
+            return getJWTVerifier().verify(token).getSubject();
         } catch (TokenExpiredException exception) {
             request.setAttribute("expiredMessage", exception.getMessage());
             throw exception;
@@ -104,28 +78,20 @@ public class TokenProvider {
         }
     }
 
-//    public Authentication getAuthentication(String email, List<GrantedAuthority> authorities, HttpServletRequest request) {
-//        UsernamePasswordAuthenticationToken usernamePasswordAuthToken = new UsernamePasswordAuthenticationToken(email,
-//                null,
-//                authorities);
-//        usernamePasswordAuthToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-//        return usernamePasswordAuthToken;
-//    }
+    public List<GrantedAuthority>getAuthorities(String token) {
+        String[] claims = getClaimsFromToken(token);
+        return stream(claims).map(SimpleGrantedAuthority::new).collect(toList());
+    }
 
-    public Authentication getAuthentication(Long userId, List<GrantedAuthority> authorities, HttpServletRequest request) {
-        UsernamePasswordAuthenticationToken userPasswordAuthToken = new UsernamePasswordAuthenticationToken(userService.getUserById(userId), null, authorities);
+    public Authentication getAuthentication(String email, List<GrantedAuthority> authorities, HttpServletRequest request) {
+        UsernamePasswordAuthenticationToken userPasswordAuthToken = new UsernamePasswordAuthenticationToken(email, null, authorities);
         userPasswordAuthToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         return userPasswordAuthToken;
     }
 
-//    public boolean isTokenValid(String email, String token) {
-//        JWTVerifier verifier = getJWTVerifier();
-//        return StringUtils.isNotEmpty(email) && isTokenExpired(verifier, token);
-//    }
-
-    public boolean isTokenValid(Long userId, String token) {
+    public boolean isTokenValid(String email, String token) {
         JWTVerifier verifier = getJWTVerifier();
-        return !Objects.isNull(userId) && !isTokenExpired(verifier, token);
+        return StringUtils.isNotEmpty(email) && !isTokenExpired(verifier, token);
     }
 
     private boolean isTokenExpired(JWTVerifier verifier, String token) {
@@ -133,30 +99,21 @@ public class TokenProvider {
         return expiration.before(new Date());
     }
 
-    private String[] getClaimsFromToken(String token) {
-        JWTVerifier verifier = getJWTVerifier();
-        return verifier.verify(token)
-                .getClaim(AUTHORITIES)
-                .asArray(String.class);
+    private String[] getClaimsFromUser(UserPrincipal userPrincipal) {
+        return userPrincipal.getAuthorities().stream().map(GrantedAuthority::getAuthority).toArray(String[]::new);
     }
 
-    private String[] getClaimsFromUser(UserPrincipal userPrincipal) {
-        return userPrincipal.getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .toArray(String[]::new);
+    private String[] getClaimsFromToken(String token) {
+        JWTVerifier verifier = getJWTVerifier();
+        return verifier.verify(token).getClaim(AUTHORITIES).asArray(String.class);
     }
 
     private JWTVerifier getJWTVerifier() {
         JWTVerifier verifier;
         try {
             Algorithm algorithm = HMAC512(secret);
-            verifier = JWT.require(algorithm)
-                    .withIssuer(C_MGMT_FS)
-                    .build();
-        } catch (JWTVerificationException e) {
-            throw new JWTVerificationException(TOKEN_CANNOT_BE_VERIFIED, e);
-        }
+            verifier = JWT.require(algorithm).withIssuer(C_MGMT_FS).build();
+        }catch (JWTVerificationException exception) { throw new JWTVerificationException(TOKEN_CANNOT_BE_VERIFIED); }
         return verifier;
     }
 }

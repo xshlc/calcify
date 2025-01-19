@@ -41,11 +41,6 @@ public class UserServiceImpl implements UserService {
         userRepository.sendVerificationCode(user);
     }
 
-    /**
-     * @param email 
-     * @param code
-     * @return
-     */
     @Override
     public UserDTO verifyCode(String email, String code) {
         return mapToUserDTO(userRepository.verifyCode(email, code));
