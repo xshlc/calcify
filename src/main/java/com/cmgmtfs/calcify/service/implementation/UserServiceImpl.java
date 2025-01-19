@@ -26,8 +26,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO getUserByEmail(String email) {
+        System.out.println("Fetching user by email (UserServiceImpl): " + email);
         return mapToUserDTO(userRepository.getUserByEmail(email));
     }
+
+    @Override
+    public UserDTO getUserById(Long userId) {
+        return mapToUserDTO(userRepository.get(userId));
+    }
+
 
     @Override
     public void sendVerificationCode(UserDTO user) {

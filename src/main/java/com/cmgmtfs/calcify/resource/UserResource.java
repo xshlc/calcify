@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -22,6 +23,7 @@ import static java.time.LocalDateTime.now;
 import static java.util.Map.of;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.security.authentication.UsernamePasswordAuthenticationToken.unauthenticated;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath;
 
 @RestController
@@ -37,7 +39,7 @@ public class UserResource {
     public ResponseEntity<HttpResponse> login(@RequestBody @Valid LoginForm loginForm) {
         //
         // inject AuthenticationManager
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginForm.getEmail(),
+        authenticationManager.authenticate(unauthenticated(loginForm.getEmail(),
                 loginForm.getPassword()));
 
         UserDTO userDTO = userService.getUserByEmail(loginForm.getEmail());
@@ -60,6 +62,25 @@ public class UserResource {
                                 .status(CREATED)
                                 .statusCode(CREATED.value())
                                 .build());
+
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<HttpResponse> profile(Authentication authentication) {
+        System.out.println("Authentication object: " + authentication);
+        System.out.println("Username from the Authentication object: " + authentication.getName());
+        UserDTO userDTO = userService.getUserByEmail(authentication.getName()); // getName should return the email
+        System.out.println("UserDTO from the service: " + userDTO);
+        // log for testing
+//        System.out.println(authentication.getPrincipal());
+        return ResponseEntity.ok()
+                .body(HttpResponse.builder()
+                        .timeStamp(now().toString())
+                        .data(of("user", userDTO))
+                        .message("Profile Retrieved")
+                        .status(OK)
+                        .statusCode(OK.value())
+                        .build());
 
     }
 

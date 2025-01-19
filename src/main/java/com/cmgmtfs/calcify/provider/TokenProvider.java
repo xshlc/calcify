@@ -7,7 +7,9 @@ import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.cmgmtfs.calcify.domain.UserPrincipal;
+import com.cmgmtfs.calcify.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 import static java.lang.System.currentTimeMillis;
@@ -26,6 +29,7 @@ import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
 @Component
+@RequiredArgsConstructor
 public class TokenProvider {
     public static final String AUTHORITIES = "authorities";
     public static final String TOKEN_CANNOT_BE_VERIFIED = "Token cannot be verified";
@@ -33,6 +37,8 @@ public class TokenProvider {
     private static final String CUSTOMER_MANAGEMENT_SERVICE = "CUSTOMER_MANAGEMENT_SERVICE";
     private static final long ACCESS_TOKEN_EXPIRATION_TIME = 1_800_000; // 30 minutes
     private static final long REFRESH_TOKEN_EXPIRATION_TIME = 432_000_000; // 5 days
+
+    private final UserService userService;
 
     @Value("${jwt.secret}")
     private String secret;
@@ -68,33 +74,58 @@ public class TokenProvider {
                 .collect(toList());
     }
 
-    public String getSubject(String token, HttpServletRequest request) {
-        JWTVerifier verifier = getJWTVerifier();
-        String subject = "";
+//    public String getSubject(String token, HttpServletRequest request) {
+//        JWTVerifier verifier = getJWTVerifier();
+//        String subject = "";
+//        try {
+//            subject = verifier.verify(token)
+//                    .getSubject();
+//        } catch (TokenExpiredException e) {
+//            request.setAttribute("expiredMessage", e.getMessage());
+//        } catch (InvalidClaimException e) {
+//            request.setAttribute("invalidClaim", e.getMessage());
+//        } catch (Exception e) {
+//            throw e;
+//        }
+//        return subject;
+//    }
+
+    public Long getSubject(String token, HttpServletRequest request) {
         try {
-            subject = verifier.verify(token)
-                    .getSubject();
-        } catch (TokenExpiredException e) {
-            request.setAttribute("expiredMessage", e.getMessage());
-        } catch (InvalidClaimException e) {
-            request.setAttribute("invalidClaim", e.getMessage());
-        } catch (Exception e) {
-            throw e;
+            return Long.valueOf(getJWTVerifier().verify(token).getSubject());
+        } catch (TokenExpiredException exception) {
+            request.setAttribute("expiredMessage", exception.getMessage());
+            throw exception;
+        } catch (InvalidClaimException exception) {
+            request.setAttribute("invalidClaim", exception.getMessage());
+            throw exception;
+        } catch (Exception exception) {
+            throw exception;
         }
-        return subject;
     }
 
-    public Authentication getAuthentication(String email, List<GrantedAuthority> authorities, HttpServletRequest request) {
-        UsernamePasswordAuthenticationToken usernamePasswordAuthToken = new UsernamePasswordAuthenticationToken(email,
-                null,
-                authorities);
-        usernamePasswordAuthToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        return usernamePasswordAuthToken;
+//    public Authentication getAuthentication(String email, List<GrantedAuthority> authorities, HttpServletRequest request) {
+//        UsernamePasswordAuthenticationToken usernamePasswordAuthToken = new UsernamePasswordAuthenticationToken(email,
+//                null,
+//                authorities);
+//        usernamePasswordAuthToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+//        return usernamePasswordAuthToken;
+//    }
+
+    public Authentication getAuthentication(Long userId, List<GrantedAuthority> authorities, HttpServletRequest request) {
+        UsernamePasswordAuthenticationToken userPasswordAuthToken = new UsernamePasswordAuthenticationToken(userService.getUserById(userId), null, authorities);
+        userPasswordAuthToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        return userPasswordAuthToken;
     }
 
-    public boolean isTokenValid(String email, String token) {
+//    public boolean isTokenValid(String email, String token) {
+//        JWTVerifier verifier = getJWTVerifier();
+//        return StringUtils.isNotEmpty(email) && isTokenExpired(verifier, token);
+//    }
+
+    public boolean isTokenValid(Long userId, String token) {
         JWTVerifier verifier = getJWTVerifier();
-        return StringUtils.isNotEmpty(email) && isTokenExpired(verifier, token);
+        return !Objects.isNull(userId) && !isTokenExpired(verifier, token);
     }
 
     private boolean isTokenExpired(JWTVerifier verifier, String token) {

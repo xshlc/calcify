@@ -185,6 +185,7 @@ public class UserRepositoryImpl<T extends User> implements UserRepository<T>, Us
             User user = jdbcTemplate.queryForObject(SELECT_USER_BY_EMAIL_QUERY,
                     of("email", email),
                     new UserRowMapper());
+            System.out.println("Fetching user by userRepo: " + user);
             return user;
         } catch (EmptyResultDataAccessException exception) {
 //            log.error(exception.getMessage());

@@ -11,4 +11,7 @@ public interface UserService {
 //    User getUser(String email);
 
     UserDTO verifyCode(String email, String code);
+
+    // testing user profile not working
+    UserDTO getUserById(Long userId);
 }
