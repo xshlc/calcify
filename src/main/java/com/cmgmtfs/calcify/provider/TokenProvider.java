@@ -35,8 +35,8 @@ public class TokenProvider {
     public static final String TOKEN_CANNOT_BE_VERIFIED = "Token cannot be verified";
     private static final String C_MGMT_FS = "C_MGMT_FS";
     private static final String CUSTOMER_MANAGEMENT_SERVICE = "CUSTOMER_MANAGEMENT_SERVICE";
-//    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 1_800_000; // 30 minutes
-    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 1; // for testing token expiry with the ExceptionUtils.processError()
+    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 1_800_000; // 30 minutes
+//    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 1; // for testing token expiry with the ExceptionUtils.processError()
     private static final long REFRESH_TOKEN_EXPIRATION_TIME = 432_000_000; // 5 days
 
     private final UserService userService;
