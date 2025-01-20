@@ -35,7 +35,8 @@ public class TokenProvider {
     public static final String TOKEN_CANNOT_BE_VERIFIED = "Token cannot be verified";
     private static final String C_MGMT_FS = "C_MGMT_FS";
     private static final String CUSTOMER_MANAGEMENT_SERVICE = "CUSTOMER_MANAGEMENT_SERVICE";
-    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 1_800_000; // 30 minutes
+//    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 1_800_000; // 30 minutes
+    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 1; // for testing token expiry with the ExceptionUtils.processError()
     private static final long REFRESH_TOKEN_EXPIRATION_TIME = 432_000_000; // 5 days
 
     private final UserService userService;
@@ -44,6 +45,10 @@ public class TokenProvider {
     private String secret;
 
     public String createAccessToken(UserPrincipal userPrincipal) {
+        System.out.println(ACCESS_TOKEN_EXPIRATION_TIME);
+        final long exp = currentTimeMillis() * ACCESS_TOKEN_EXPIRATION_TIME;
+        System.out.println(exp);
+        System.out.println("On new token " + new Date(exp));
         return JWT.create()
                 .withIssuer(C_MGMT_FS)
                 .withAudience(CUSTOMER_MANAGEMENT_SERVICE)
@@ -96,6 +101,7 @@ public class TokenProvider {
 
     private boolean isTokenExpired(JWTVerifier verifier, String token) {
         Date expiration = verifier.verify(token).getExpiresAt();
+        System.out.println("Expiration date " + expiration);
         return expiration.before(new Date());
     }
 
