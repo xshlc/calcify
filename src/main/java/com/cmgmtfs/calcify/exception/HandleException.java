@@ -7,13 +7,16 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.time.LocalDateTime.now;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.resolve;
 
 public class HandleException extends ResponseEntityExceptionHandler implements ErrorController {
@@ -29,7 +32,6 @@ public class HandleException extends ResponseEntityExceptionHandler implements E
                 .build(), statusCode);
 
     }
-
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
@@ -61,6 +63,21 @@ public class HandleException extends ResponseEntityExceptionHandler implements E
                 .status(resolve(statusCode.value()))
                 .statusCode(statusCode.value())
                 .build(), statusCode);
+    }
+
+    @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
+    public ResponseEntity<HttpResponse> sqlIntegrityConstraintViolationException(SQLIntegrityConstraintViolationException exception) {
+
+
+        return new ResponseEntity<>(HttpResponse.builder()
+                .timeStamp(now().toString())
+                // what we are showing through the reason() is not good in production
+                // only okay for developing and testing
+                .reason(exception.getMessage().contains("Duplicate entry") ? "Information already exists" : exception.getMessage())
+                .developerMessage(exception.getMessage())  // don't do this in production
+                .status(BAD_REQUEST)
+                .statusCode(BAD_REQUEST.value())
+                .build(), BAD_REQUEST);
     }
 
 }
