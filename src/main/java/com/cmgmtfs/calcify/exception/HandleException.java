@@ -5,6 +5,7 @@ import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -80,12 +81,24 @@ public class HandleException extends ResponseEntityExceptionHandler implements E
                 .build(), BAD_REQUEST);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<HttpResponse> generalExceptionHandler(Exception exception) {
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<HttpResponse> generalExceptionHandler(Exception exception) {
+//        // this method will catch every exception
+//        return new ResponseEntity<>(HttpResponse.builder()
+//                .timeStamp(now().toString())
+//                .reason(exception.getMessage())
+//                .developerMessage(exception.getMessage())  // don't do this in production
+//                .status(BAD_REQUEST)
+//                .statusCode(BAD_REQUEST.value())
+//                .build(), BAD_REQUEST);
+//    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<HttpResponse> badCredentialException(BadCredentialsException exception) {
         // this method will catch every exception
         return new ResponseEntity<>(HttpResponse.builder()
                 .timeStamp(now().toString())
-                .reason(exception.getMessage())
+                .reason(exception.getMessage() + ", Incorrect email or password ")
                 .developerMessage(exception.getMessage())  // don't do this in production
                 .status(BAD_REQUEST)
                 .statusCode(BAD_REQUEST.value())
