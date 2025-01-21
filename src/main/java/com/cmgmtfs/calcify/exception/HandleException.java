@@ -2,11 +2,10 @@ package com.cmgmtfs.calcify.exception;
 
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.cmgmtfs.calcify.domain.HttpResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.servlet.error.ErrorController;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -14,6 +13,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 import static java.time.LocalDateTime.now;
 import static org.springframework.http.HttpStatus.*;
 
+@ControllerAdvice
+@Slf4j  // for logging
 public class HandleException extends ResponseEntityExceptionHandler implements ErrorController {
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(Exception exception, Object body, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
@@ -204,43 +206,5 @@ public class HandleException extends ResponseEntityExceptionHandler implements E
                 , BAD_REQUEST);
     }
 
-    @ExceptionHandler(DataAccessException.class)
-    public ResponseEntity<HttpResponse> dataAccessException(DataAccessException exception) {
-        return new ResponseEntity<>(
-                HttpResponse.builder()
-                        .timeStamp(now().toString())
-                        .reason(processErrorMessage(exception.getMessage()))
-                        .developerMessage(processErrorMessage(exception.getMessage()))
-                        .status(BAD_REQUEST)
-                        .statusCode(BAD_REQUEST.value())
-                        .build()
-                , BAD_REQUEST);
-    }
 
-    private ResponseEntity<HttpResponse> createErrorHttpResponse(HttpStatus httpStatus, String reason, Exception exception) {
-        return new ResponseEntity<>(
-                HttpResponse.builder()
-                        .timeStamp(now().toString())
-                        .developerMessage(exception.getMessage())
-                        .reason(reason)
-                        .status(httpStatus)
-                        .statusCode(httpStatus.value())
-                        .build()
-                , httpStatus);
-    }
-
-    private String processErrorMessage(String errorMessage) {
-        if (errorMessage != null) {
-            if (errorMessage.contains("Duplicate entry") && errorMessage.contains("AccountVerifications")) {
-                return "You already verified your account.";
-            }
-            if (errorMessage.contains("Duplicate entry") && errorMessage.contains("ResetPasswordVerifications")) {
-                return "We already sent you an email to reset your password.";
-            }
-            if (errorMessage.contains("Duplicate entry")) {
-                return "Duplicate entry. Please try again.";
-            }
-        }
-        return "Some error occurred";
-    }
 }
