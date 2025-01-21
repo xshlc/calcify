@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.nio.file.AccessDeniedException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.time.LocalDateTime.now;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.resolve;
+import static org.springframework.http.HttpStatus.*;
 
 public class HandleException extends ResponseEntityExceptionHandler implements ErrorController {
     @Override
@@ -95,7 +95,6 @@ public class HandleException extends ResponseEntityExceptionHandler implements E
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<HttpResponse> badCredentialException(BadCredentialsException exception) {
-        // this method will catch every exception
         return new ResponseEntity<>(HttpResponse.builder()
                 .timeStamp(now().toString())
                 .reason(exception.getMessage() + ", Incorrect email or password ")
@@ -107,7 +106,6 @@ public class HandleException extends ResponseEntityExceptionHandler implements E
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<HttpResponse> apiException(ApiException exception) {
-        // this method will catch every exception
         return new ResponseEntity<>(HttpResponse.builder()
                 .timeStamp(now().toString())
                 .reason(exception.getMessage())
@@ -116,5 +114,18 @@ public class HandleException extends ResponseEntityExceptionHandler implements E
                 .statusCode(BAD_REQUEST.value())
                 .build(), BAD_REQUEST);
     }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<HttpResponse> accessDeniedException(AccessDeniedException exception) {
+        return new ResponseEntity<>(HttpResponse.builder()
+                .timeStamp(now().toString())
+                .reason("Access denied. You don\'t have access to this resource.")
+                .developerMessage(exception.getMessage())  // don't do this in production
+                .status(FORBIDDEN)
+                .statusCode(FORBIDDEN.value())
+                .build(), FORBIDDEN);
+    }
+
+
 
 }
