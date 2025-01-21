@@ -53,9 +53,11 @@ public class HandleException extends ResponseEntityExceptionHandler implements E
          */
 
 
-
-        List<FieldError> fieldErrors = exception.getBindingResult().getFieldErrors();
-        String fieldMessage = fieldErrors.stream().map(FieldError::getDefaultMessage).collect(Collectors.joining(", "));
+        List<FieldError> fieldErrors = exception.getBindingResult()
+                .getFieldErrors();
+        String fieldMessage = fieldErrors.stream()
+                .map(FieldError::getDefaultMessage)
+                .collect(Collectors.joining(", "));
         return new ResponseEntity<>(HttpResponse.builder()
                 .timeStamp(now().toString())
 //                .reason(exception.getMessage())
@@ -74,7 +76,8 @@ public class HandleException extends ResponseEntityExceptionHandler implements E
                 .timeStamp(now().toString())
                 // what we are showing through the reason() is not good in production
                 // only okay for developing and testing
-                .reason(exception.getMessage().contains("Duplicate entry") ? "Information already exists" : exception.getMessage())
+                .reason(exception.getMessage()
+                        .contains("Duplicate entry") ? "Information already exists" : exception.getMessage())
                 .developerMessage(exception.getMessage())  // don't do this in production
                 .status(BAD_REQUEST)
                 .statusCode(BAD_REQUEST.value())
@@ -126,6 +129,19 @@ public class HandleException extends ResponseEntityExceptionHandler implements E
                 .build(), FORBIDDEN);
     }
 
-
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<HttpResponse> exception(Exception exception) {
+        System.out.println(exception);
+        return new ResponseEntity<>(
+                HttpResponse.builder()
+                        .timeStamp(now().toString())
+                        .reason(exception.getMessage() != null ?
+                                (exception.getMessage().contains("expected 1, actual 0") ? "Record not found" : exception.getMessage())
+                                : "Some error occurred")
+                        .developerMessage(exception.getMessage())
+                        .status(INTERNAL_SERVER_ERROR)
+                        .statusCode(INTERNAL_SERVER_ERROR.value())
+                        .build(), INTERNAL_SERVER_ERROR);
+    }
 
 }
