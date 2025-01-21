@@ -32,6 +32,7 @@ public class HandleException extends ResponseEntityExceptionHandler implements E
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(Exception exception, Object body, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
 //        return super.handleExceptionInternal(exception, body, headers, statusCode, request);
+        log.error(exception.getMessage());
         return new ResponseEntity<>(HttpResponse.builder()
                 .timeStamp(now().toString())
                 .reason(exception.getMessage())
@@ -60,6 +61,7 @@ public class HandleException extends ResponseEntityExceptionHandler implements E
 
          */
 
+        log.error(exception.getMessage());
 
         List<FieldError> fieldErrors = exception.getBindingResult()
                 .getFieldErrors();
@@ -79,7 +81,7 @@ public class HandleException extends ResponseEntityExceptionHandler implements E
     @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
     public ResponseEntity<HttpResponse> sqlIntegrityConstraintViolationException(SQLIntegrityConstraintViolationException exception) {
 
-
+        log.error(exception.getMessage());
         return new ResponseEntity<>(HttpResponse.builder()
                 .timeStamp(now().toString())
                 // what we are showing through the reason() is not good in production
@@ -106,6 +108,7 @@ public class HandleException extends ResponseEntityExceptionHandler implements E
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<HttpResponse> badCredentialException(BadCredentialsException exception) {
+        log.error(exception.getMessage());
         return new ResponseEntity<>(HttpResponse.builder()
                 .timeStamp(now().toString())
                 .reason(exception.getMessage() + ", Incorrect email or password ")
@@ -117,6 +120,7 @@ public class HandleException extends ResponseEntityExceptionHandler implements E
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<HttpResponse> apiException(ApiException exception) {
+        log.error(exception.getMessage());
         return new ResponseEntity<>(HttpResponse.builder()
                 .timeStamp(now().toString())
                 .reason(exception.getMessage())
@@ -128,6 +132,7 @@ public class HandleException extends ResponseEntityExceptionHandler implements E
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<HttpResponse> accessDeniedException(AccessDeniedException exception) {
+        log.error(exception.getMessage());
         return new ResponseEntity<>(HttpResponse.builder()
                 .timeStamp(now().toString())
                 .reason("Access denied. You don\'t have access to this resource.")
@@ -139,71 +144,67 @@ public class HandleException extends ResponseEntityExceptionHandler implements E
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<HttpResponse> exception(Exception exception) {
+        log.error(exception.getMessage());
         System.out.println(exception);
-        return new ResponseEntity<>(
-                HttpResponse.builder()
-                        .timeStamp(now().toString())
-                        .reason(exception.getMessage() != null ?
-                                (exception.getMessage()
-                                        .contains("expected 1, actual 0") ? "Record not found" : exception.getMessage())
-                                : "Some error occurred")
-                        .developerMessage(exception.getMessage())
-                        .status(INTERNAL_SERVER_ERROR)
-                        .statusCode(INTERNAL_SERVER_ERROR.value())
-                        .build(), INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(HttpResponse.builder()
+                .timeStamp(now().toString())
+                .reason(exception.getMessage() != null ? (exception.getMessage()
+                        .contains("expected 1, actual 0") ? "Record not found" : exception.getMessage()) : "Some error occurred")
+                .developerMessage(exception.getMessage())
+                .status(INTERNAL_SERVER_ERROR)
+                .statusCode(INTERNAL_SERVER_ERROR.value())
+                .build(), INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(JWTDecodeException.class)
     public ResponseEntity<HttpResponse> exception(JWTDecodeException exception) {
-        return new ResponseEntity<>(
-                HttpResponse.builder()
-                        .timeStamp(now().toString())
-                        .reason("Could not decode the token")
-                        .developerMessage(exception.getMessage())
-                        .status(INTERNAL_SERVER_ERROR)
-                        .statusCode(INTERNAL_SERVER_ERROR.value())
-                        .build(), INTERNAL_SERVER_ERROR);
+        log.error(exception.getMessage());
+        return new ResponseEntity<>(HttpResponse.builder()
+                .timeStamp(now().toString())
+                .reason("Could not decode the token")
+                .developerMessage(exception.getMessage())
+                .status(INTERNAL_SERVER_ERROR)
+                .statusCode(INTERNAL_SERVER_ERROR.value())
+                .build(), INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(EmptyResultDataAccessException.class)
     public ResponseEntity<HttpResponse> emptyResultDataAccessException(EmptyResultDataAccessException exception) {
-        return new ResponseEntity<>(
-                HttpResponse.builder()
-                        .timeStamp(now().toString())
-                        .reason(exception.getMessage()
-                                .contains("expected 1, actual 0") ? "Record not found" : exception.getMessage())
-                        .developerMessage(exception.getMessage())
-                        .status(BAD_REQUEST)
-                        .statusCode(BAD_REQUEST.value())
-                        .build(), BAD_REQUEST);
+        log.error(exception.getMessage());
+        return new ResponseEntity<>(HttpResponse.builder()
+                .timeStamp(now().toString())
+                .reason(exception.getMessage()
+                        .contains("expected 1, actual 0") ? "Record not found" : exception.getMessage())
+                .developerMessage(exception.getMessage())
+                .status(BAD_REQUEST)
+                .statusCode(BAD_REQUEST.value())
+                .build(), BAD_REQUEST);
     }
 
     @ExceptionHandler(DisabledException.class)
     public ResponseEntity<HttpResponse> disabledException(DisabledException exception) {
-        return new ResponseEntity<>(
-                HttpResponse.builder()
-                        .timeStamp(now().toString())
-                        .developerMessage(exception.getMessage())
-                        //.reason(exception.getMessage() + ". Please check your email and verify your account.")
-                        .reason("User account is currently disabled")
-                        .status(BAD_REQUEST)
-                        .statusCode(BAD_REQUEST.value())
-                        .build()
-                , BAD_REQUEST);
+        log.error(exception.getMessage());
+        return new ResponseEntity<>(HttpResponse.builder()
+                .timeStamp(now().toString())
+                .developerMessage(exception.getMessage())
+                //.reason(exception.getMessage() + ". Please check your email and verify your account.")
+                .reason("User account is currently disabled")
+                .status(BAD_REQUEST)
+                .statusCode(BAD_REQUEST.value())
+                .build(), BAD_REQUEST);
     }
 
     @ExceptionHandler(LockedException.class)
     public ResponseEntity<HttpResponse> lockedException(LockedException exception) {
-        return new ResponseEntity<>(
-                HttpResponse.builder()
-                        .timeStamp(now().toString())
-                        .developerMessage(exception.getMessage())
-                        //.reason(exception.getMessage() + ", too many failed attempts.")
-                        .reason("User account is currently locked")
-                        .status(BAD_REQUEST)
-                        .statusCode(BAD_REQUEST.value())
-                        .build()
-                , BAD_REQUEST);
+        log.error(exception.getMessage());
+        return new ResponseEntity<>(HttpResponse.builder()
+                .timeStamp(now().toString())
+                .developerMessage(exception.getMessage())
+                //.reason(exception.getMessage() + ", too many failed attempts.")
+                .reason("User account is currently locked")
+                .status(BAD_REQUEST)
+                .statusCode(BAD_REQUEST.value())
+                .build(), BAD_REQUEST);
     }
 
 
