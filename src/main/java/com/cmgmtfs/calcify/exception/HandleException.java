@@ -94,9 +94,10 @@ public class HandleException extends ResponseEntityExceptionHandler implements E
                 .build(), BAD_REQUEST);
     }
 
+
+    /* THIS IS THE GENERAL FORMAT */
 //    @ExceptionHandler(Exception.class)
 //    public ResponseEntity<HttpResponse> generalExceptionHandler(Exception exception) {
-//        // this method will catch every exception
 //        return new ResponseEntity<>(HttpResponse.builder()
 //                .timeStamp(now().toString())
 //                .reason(exception.getMessage())
